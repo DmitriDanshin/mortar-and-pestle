@@ -21,16 +21,16 @@ root = Tk.Tk()
 root.wm_title("Резонатор Фабри — Перо")
 root.wm_protocol("WM_DELETE_WINDOW", root.quit)
 
-labda = 550 * nm;
-size = 5 * mm;
-N = 300
+wavelength = 512 * nm # Длина волны
+size = 5 * mm # Масштаб
+N = 300  # Количество шагов интегрирования
 
 f = 100 * mm
 r = 0.7
 d = 6 * mm
 Dlabda = 0.0
 nmedium = 1.0
-k = 2 * math.pi / labda;
+k = 2 * math.pi / wavelength
 
 D = DoubleVar()
 R = DoubleVar()
@@ -56,25 +56,25 @@ def TheExample(event):
     nmedium = NMEDIUM.get()
     d = D.get() * mm
     r = R.get()
-    k2 = 2 * math.pi / (labda + Dlabda)
-    Fin = 4.0 * r / (1.0 - r)
-    F = Begin(size, labda, N);
-    I = Intensity(1, F);
-    step = size / N / mm;
+    k2 = 2 * math.pi / (wavelength + Dlabda)
+
+    F = Begin(size, wavelength, N)
+    I = Intensity(1, F)
+    step = size / N / mm
     for i in range(1, N):
-        xray = i * step;
+        xray = i * step
         for j in range(1, N):
-            yray = j * step;
-            X = xray * mm - size / 2;
-            Y = yray * mm - size / 2;
-            radius = math.sqrt(X * X + Y * Y);
-            theta = radius / f;
-            delta2 = k * nmedium * d * math.cos(theta);
-            Inten = 0.5 / (1 + Fin * math.pow(math.sin(delta2), 2));
-            delta2 = k2 * nmedium * d * math.cos(theta);
-            I[i][j] = (Inten + 0.5 / (1 + Fin * math.pow(math.sin(delta2), 2)));
+            yray = j * step
+            X = xray * mm - size / 2
+            Y = yray * mm - size / 2
+            radius = math.sqrt(X * X + Y * Y)
+            theta = radius / f
+            delta2 = k * nmedium * d * math.cos(theta)
+            Inten = 0.5 / (1 + (4.0 * r / (1.0 - r)) * math.pow(math.sin(delta2), 2))
+            delta2 = k2 * nmedium * d * math.cos(theta)
+            I[i][j] = (Inten + 0.5 / (1 + (4.0 * r / (1.0 - r)) * math.pow(math.sin(delta2), 2)))
     ax1.clear()
-    ax1.imshow(I, cmap='hot')
+    ax1.imshow(I, cmap='gist_heat')
     ax1.axis('off')
     ax1.axis('equal')
     str = 'Распределение интенсивности'
@@ -83,7 +83,7 @@ def TheExample(event):
 
 
 def motion(event):
-    x = event.xdata;
+    x = event.xdata
     y = event.ydata
     if x and y is not None and 0 < x < N and 0 < y < N:
         v.set('x=%3.2f mm, y=%3.2f mm\n I=%3.3f [a.u.]' % (
@@ -144,8 +144,6 @@ Button(root,
        text='Quit',
        cursor="hand2",
        command=_quit).pack(pady=10)
-
-
 
 Label(root, textvariable=v).pack(pady=50)
 
