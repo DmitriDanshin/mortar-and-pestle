@@ -47,6 +47,7 @@ class Plot(FigureCanvasQTAgg):
         ax1.axis('equal')
         str = 'Распределение интенсивности'
         ax1.set_title(str)
+        plt.close(fig)
         return fig
 
     def __init__(self, wavelength, reflection):
