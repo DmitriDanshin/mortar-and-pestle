@@ -1,5 +1,6 @@
 import math
 import matplotlib
+import numpy as np
 from LightPipes import nm, mm, Begin, Intensity
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -11,18 +12,17 @@ matplotlib.use('Qt5Agg')
 
 class Plot(FigureCanvasQTAgg):
 
-    def TheExample(self, wavelength, reflection):
+    def TheExample(self, wavelength, reflection, distance, n):
         wavelength = wavelength * nm  # Длина волны
         size = 5 * mm  # Масштаб
         N = 300  # Количество шагов интегрирования
         f = 100 * mm
-        d = 6 * mm
+        d = distance * mm
         Dlabda = 0.0
-        nmedium = 1.0
+        nmedium = n
         k = 2 * math.pi / wavelength
 
-        fig = plt.figure(figsize=(6, 4))
-        ax1 = fig.add_subplot(111)
+        fig, ax1 = plt.subplots(2, figsize=(15, 15))
 
         k2 = 2 * math.pi / (wavelength + Dlabda)
 
@@ -41,26 +41,31 @@ class Plot(FigureCanvasQTAgg):
                 Inten = 0.5 / (1 + (4.0 * reflection / (1.0 - reflection)) * math.pow(math.sin(delta2), 2))
                 delta2 = k2 * nmedium * d * math.cos(theta)
                 I[i][j] = (Inten + 0.5 / (1 + (4.0 * reflection / (1.0 - reflection)) * math.pow(math.sin(delta2), 2)))
-        ax1.clear()
-        ax1.imshow(I, cmap='gist_heat')
-        ax1.axis('off')
-        ax1.axis('equal')
+        ax1[0].clear()
+        x1 = np.linspace(0, 1, N)
+        ax1[0].plot(x1, I[int(N / 2), :], "r")  # for 2d mode
+
+        ax1[1].imshow(I, cmap="gist_heat")
+        ax1[1].axis('off')
+        ax1[1].axis('equal')
         str = 'Распределение интенсивности'
-        ax1.set_title(str)
+        ax1[0].set_title(str)
         plt.close(fig)
         return fig
 
-    def __init__(self, wavelength, reflection):
-        self.init(wavelength, reflection)
+    def __init__(self, wavelength, reflection, distance, n):
+        self.fig = None
+        self.axes = None
+        self.init(wavelength, reflection, distance, n)
         super(Plot, self).__init__(self.fig)
 
-    def init(self, wavelength, reflection):
+    def init(self, wavelength, reflection, distance, n):
         self.axes = None
-        self.fig = self.TheExample(wavelength, reflection)
+        self.fig = self.TheExample(wavelength, reflection, distance, n)
 
-    def update_parameters(self, wavelength, reflection):
+    def update_parameters(self, wavelength, reflection, distance, n):
         self.fig.clf()
-        self.init(wavelength, reflection)
+        self.init(wavelength, reflection, distance, n)
         self.draw()
 
 

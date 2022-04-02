@@ -9,22 +9,33 @@ matplotlib.use('Qt5Agg')
 class Main(QMainWindow, Ui_MainWindow):
     wavelength = 500
     reflection = 0.7
+    distance = 3  # 0 .. 10
+    n = 1.0
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.plot2d = None
         self.tb = None
         self.plot = None
         self.setupUi(self)
         self.init_plots()
 
     def update_plots(self):
-        self.plot.update_parameters(self.wavelength, self.reflection)
+        self.plot.update_parameters(self.wavelength, self.reflection, self.distance, self.n)
         self.plot1Grid.removeWidget(self.plot)
-        self.plot = Plot(self.wavelength, self.reflection)
+        self.plot = Plot(self.wavelength, self.reflection, self.distance, self.n)
         self.plot1Grid.addWidget(self.plot)
-        self.plot1Grid.removeWidget(self.tb)
         self.tb = ToolBar(self.plot)
-        self.plot1Grid.addWidget(self.tb)
+
+    def change_distance(self, x):
+        self.distance = x / 10
+        self.distance_label.setText(f"{self.distance : .2f}")
+        self.update_plots()
+
+    def change_n(self, x):
+        self.n = x
+        self.n_label.setText(str(x))
+        self.update_plots()
 
     def change_reflection(self, x):
         self.reflection = x / 100
@@ -39,10 +50,14 @@ class Main(QMainWindow, Ui_MainWindow):
     def init_plots(self):
         self.plot = Plot(
             wavelength=self.wavelength,
-            reflection=self.reflection
+            reflection=self.reflection,
+            distance=self.distance,
+            n=self.n
         )
+
         self.plot1Grid.addWidget(self.plot)
 
-
-        self.horizontalSlider.valueChanged.connect(lambda y: self.change_wavelength(y))
-        self.horizontalSlider_2.valueChanged.connect(lambda y: self.change_reflection(y))
+        self.horizontalSlider.valueChanged.connect(self.change_wavelength)
+        self.horizontalSlider_2.valueChanged.connect(self.change_reflection)
+        self.horizontalSlider_3.valueChanged.connect(self.change_distance)
+        self.doubleSpinBox.valueChanged.connect(self.change_n)
