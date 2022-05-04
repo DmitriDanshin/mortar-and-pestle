@@ -22,24 +22,16 @@ class Ui_MainWindow(object):
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")
-        self.horizontalSlider_3 = QtWidgets.QSlider(self.centralwidget)
-        self.horizontalSlider_3.setOrientation(QtCore.Qt.Horizontal)
-        self.horizontalSlider_3.setObjectName("horizontalSlider_3")
-        self.gridLayout.addWidget(self.horizontalSlider_3, 2, 3, 1, 1)
+
+
         self.distance_label = QtWidgets.QLabel(self.centralwidget)
         self.distance_label.setObjectName("distance_label")
         self.gridLayout.addWidget(self.distance_label, 2, 1, 1, 1)
         self.reflection_label = QtWidgets.QLabel(self.centralwidget)
         self.reflection_label.setObjectName("reflection_label")
         self.gridLayout.addWidget(self.reflection_label, 1, 1, 1, 1)
-        self.horizontalSlider_2 = QtWidgets.QSlider(self.centralwidget)
-        self.horizontalSlider_2.setOrientation(QtCore.Qt.Horizontal)
-        self.horizontalSlider_2.setObjectName("horizontalSlider_2")
-        self.gridLayout.addWidget(self.horizontalSlider_2, 1, 3, 1, 1)
-        self.horizontalSlider = QtWidgets.QSlider(self.centralwidget)
-        self.horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
-        self.horizontalSlider.setObjectName("horizontalSlider")
-        self.gridLayout.addWidget(self.horizontalSlider, 0, 3, 1, 1)
+
+
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
         self.label_3.setObjectName("label_3")
         self.gridLayout.addWidget(self.label_3, 2, 0, 1, 1)

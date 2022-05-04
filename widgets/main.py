@@ -2,8 +2,19 @@ from PyQt5.QtWidgets import QMainWindow
 import matplotlib
 from widgets.plot import Plot, ToolBar
 from assets.MainWindow import Ui_MainWindow
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 matplotlib.use('Qt5Agg')
+
+
+class OptimizedSlider(QtWidgets.QSlider):
+    def __init__(self, widget, f):
+        super().__init__(widget)
+        self.f = f
+
+    def mouseReleaseEvent(self, ev: QtGui.QMouseEvent) -> None:
+        super(OptimizedSlider, self).mouseReleaseEvent(ev)
+        self.f(self.value())
 
 
 class Main(QMainWindow, Ui_MainWindow):
@@ -57,7 +68,19 @@ class Main(QMainWindow, Ui_MainWindow):
 
         self.plot1Grid.addWidget(self.plot)
 
-        self.horizontalSlider.valueChanged.connect(self.change_wavelength)
-        self.horizontalSlider_2.valueChanged.connect(self.change_reflection)
-        self.horizontalSlider_3.valueChanged.connect(self.change_distance)
+        self.horizontalSlider = OptimizedSlider(self.centralwidget, f=self.change_wavelength)
+        self.horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
+        self.horizontalSlider.setObjectName("horizontalSlider")
+        self.gridLayout.addWidget(self.horizontalSlider, 0, 3, 1, 1)
+
+        self.horizontalSlider_2 = OptimizedSlider(self.centralwidget, f=self.change_reflection)
+        self.horizontalSlider_2.setOrientation(QtCore.Qt.Horizontal)
+        self.horizontalSlider_2.setObjectName("horizontalSlider_2")
+        self.gridLayout.addWidget(self.horizontalSlider_2, 1, 3, 1, 1)
+
+        self.horizontalSlider_3 = OptimizedSlider(self.centralwidget, f=self.change_distance)
+        self.horizontalSlider_3.setOrientation(QtCore.Qt.Horizontal)
+        self.horizontalSlider_3.setObjectName("horizontalSlider_3")
+        self.gridLayout.addWidget(self.horizontalSlider_3, 2, 3, 1, 1)
+
         self.doubleSpinBox.valueChanged.connect(self.change_n)
