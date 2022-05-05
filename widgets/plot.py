@@ -10,8 +10,38 @@ from matplotlib import pyplot as plt
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
+from numba import njit
 
 matplotlib.use('Qt5Agg')
+
+
+@njit(fastmath=True)
+def get_intensity(
+        N: int, wavelength: float,
+        size: int, f: float,
+        medium: float, distance: float,
+        reflection: float):
+    k = 2 * math.pi / (wavelength * nm)
+
+    step = size / N
+    result = [[1.0 for _ in range(N)] for _ in range(N)]
+
+    for i in range(1, N):
+        xray = i * step
+        for j in range(1, N):
+            yray = j * step
+            x = (xray - size / 2)
+            y = (yray - size / 2)
+            radius = math.hypot(x, y)
+
+            theta = radius / f
+
+            delta = k * 2 * medium * distance * cos(theta) * mm
+
+            intensity = 1 / (1 + (4.0 * reflection / (1.0 - reflection) ** 2) * sin(delta / 2) ** 2)
+            intensity = intensity * (1 / (1 + np.exp(radius / 2 - math.e / math.pi)))
+            result[i][j] = intensity
+    return result
 
 
 @dataclass
@@ -28,33 +58,13 @@ class Intensity:
     def value(self) -> lp.Intensity:
         return self.__get_value()
 
-    def __get_au(self, radius):
-        return 1 / (1 + np.exp(radius / 2 - math.e / math.pi))
-
     def __get_value(self) -> lp.Intensity:
-        k = 2 * math.pi / (self.wavelength * nm)
-        result = lp.Intensity(Fin=lp.Begin(self.size * mm, self.wavelength * nm, self.N))
-
-        step = self.size / self.N
-
-
-
-        for i in range(1, self.N):
-            xray = i * step
-            for j in range(1, self.N):
-                yray = j * step
-                x = (xray - self.size / 2)
-                y = (yray - self.size / 2)
-                radius = math.hypot(x, y)
-
-                theta = radius / self.f
-                au = self.__get_au(radius)
-                delta = k * 2 * self.medium * self.distance * cos(theta) * mm
-
-                intensity = 1 / (1 + (4.0 * self.reflection / (1.0 - self.reflection) ** 2) * sin(delta / 2) ** 2)
-                intensity = intensity * au
-                result[i][j] = intensity
-
+        result = get_intensity(
+            self.N, self.wavelength,
+            self.size, self.f,
+            self.medium, self.distance,
+            self.reflection
+        )
         return result
 
 
@@ -66,8 +76,9 @@ class Plot(FigureCanvasQTAgg):
         fig, axes = plt.subplots(2, figsize=(15, 15))
         x = np.linspace(0, intensity.N, intensity.N)
         axes[0].clear()
-        axes[0].plot(x, intensity.value[intensity.N // 2, :], "r")  # for 2d mode
-        axes[1].imshow(intensity.value, cmap="gist_heat")
+        value = np.asarray(intensity.value)
+        axes[0].plot(x, value[intensity.N // 2, :], "r")  # for 2d mode
+        axes[1].imshow(value, cmap="gist_heat")
         axes[1].axis('off')
         axes[1].axis('equal')
         axes[0].set_title('Распределение интенсивности')
@@ -80,7 +91,7 @@ class Plot(FigureCanvasQTAgg):
             reflection=reflection,
             distance=distance,
             medium=medium,
-            N=300,
+            N=500,
             f=100,
             size=5,
         )
